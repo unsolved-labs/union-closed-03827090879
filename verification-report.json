@@ -1,0 +1,41 @@
+{
+  "release": "R010",
+  "claim": {
+    "constant_numerator": 3827090879,
+    "constant_denominator": 10000000000,
+    "constant_decimal": "0.3827090879",
+    "statement": "Every finite union-closed family other than {empty set} contains an element occurring in at least c times the number of member sets."
+  },
+  "protocol_weights": {
+    "alpha_numerator": 11249343,
+    "alpha_denominator": 12500000,
+    "beta_numerator": 1250657,
+    "beta_denominator": 12500000
+  },
+  "verification": {
+    "exact_auxiliary": "pass",
+    "boost_interval": {
+      "status": "pass",
+      "core_boxes": 3273,
+      "core_splits": 3272,
+      "max_depth": 39,
+      "least_core_lower": "4.1293562138181227e-12"
+    },
+    "mpfr_256": {
+      "status": "pass",
+      "core_boxes": 3210,
+      "core_splits": 3209,
+      "max_depth": 39,
+      "least_core_lower": "4.1428237777820989e-12"
+    },
+    "static_mpfr_replay": {
+      "status": "pass",
+      "r_leaves": 39,
+      "core_leaves": 3210,
+      "max_depth": 39,
+      "least_core_lower": "4.1428237777820989e-12",
+      "coverage_check": "complete binary prefix partition"
+    }
+  },
+  "external_specialist_review": "pending"
+}
