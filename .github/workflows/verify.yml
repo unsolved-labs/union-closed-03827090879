@@ -1,0 +1,89 @@
+name: Verify R010
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  exact-and-boost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y g++ python3 libboost-all-dev
+      - name: Materialize frozen verifier package
+        run: python3 materialize_release.py work
+      - name: Verify frozen file integrity
+        working-directory: work/release
+        run: sha256sum -c RELEASE_SHA256SUMS
+      - name: Replay exact auxiliary check
+        working-directory: work/release
+        run: python3 verify_auxiliary_inequality.py | tee auxiliary-ci.out && grep -Fq 'ALL EXACT AUXILIARY CHECKS PASSED' auxiliary-ci.out
+      - name: Replay sharp directed-rounding certificate
+        working-directory: work/release
+        run: |
+          g++ -std=c++20 -O2 -frounding-math -fno-fast-math -ffp-contract=off union_closed_sharp_verifier.cpp -o sharp
+          ./sharp | tee sharp-ci.out
+          grep -Fq 'core: boxes=3273, splits=3272, max_depth=39' sharp-ci.out
+          grep -Fq 'ALL CHECKS PASSED' sharp-ci.out
+      - name: Replay conservative certificate
+        working-directory: work/release
+        run: |
+          g++ -std=c++20 -O2 -frounding-math -fno-fast-math -ffp-contract=off union_closed_conservative_verifier.cpp -o conservative
+          ./conservative | tee conservative-ci.out
+          grep -Fq 'ALL CHECKS PASSED' conservative-ci.out
+      - name: Check frozen claim metadata
+        working-directory: work/release
+        run: |
+          python3 - <<'PY'
+          import json
+          from fractions import Fraction
+          r=json.load(open('verification-report.json'))
+          assert Fraction(r['claim']['constant_numerator'], r['claim']['constant_denominator']) == Fraction(3827090879, 10_000_000_000)
+          assert Fraction(r['protocol_weights']['alpha_numerator'], r['protocol_weights']['alpha_denominator']) + Fraction(r['protocol_weights']['beta_numerator'], r['protocol_weights']['beta_denominator']) == 1
+          assert r['external_specialist_review'] == 'pending'
+          print('FROZEN CLAIM METADATA PASSED')
+          PY
+
+  mpfr-independent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y g++ python3 libmpfr-dev libgmp-dev
+      - name: Materialize frozen verifier package
+        run: python3 materialize_release.py work
+      - name: Verify frozen file integrity
+        working-directory: work/release
+        run: sha256sum -c RELEASE_SHA256SUMS
+      - name: Replay independent MPFR-256 certificate
+        working-directory: work/release
+        run: |
+          g++ -std=c++20 -O2 mpfr_independent_verifier.cpp -lmpfr -lgmp -o mpfr
+          ./mpfr | tee mpfr-ci.out
+          grep -Fq 'MPFR core: boxes=3210, splits=3209, max_depth=39' mpfr-ci.out
+          grep -Fq 'MPFR ALL CHECKS PASSED' mpfr-ci.out
+
+  static-mpfr-replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y g++ python3 libmpfr-dev libgmp-dev
+      - name: Materialize frozen verifier package
+        run: python3 materialize_release.py work
+      - name: Verify frozen file integrity
+        working-directory: work/release
+        run: sha256sum -c RELEASE_SHA256SUMS
+      - name: Materialize static certificate
+        working-directory: work/release
+        run: python3 materialize_static_certificate.py
+      - name: Replay fixed coverage-checked certificate
+        working-directory: work/release
+        run: |
+          g++ -std=c++20 -O2 mpfr_static_replay.cpp -lmpfr -lgmp -o static-replay
+          ./static-replay r_leaf_paths.txt core_leaf_paths.txt | tee static-ci.out
+          grep -Fq 'static R: leaves=39, max_depth=14' static-ci.out
+          grep -Fq 'static core: leaves=3210, max_depth=39' static-ci.out
+          grep -Fq 'STATIC MPFR CERTIFICATE PASSED' static-ci.out
