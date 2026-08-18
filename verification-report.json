@@ -37,5 +37,18 @@
       "coverage_check": "complete binary prefix partition"
     }
   },
+  "public_artifacts": {
+    "manuscript_source": "manuscript/r010_union_closed_bound.tex",
+    "manuscript_build": "make -C manuscript",
+    "statement_audit": "STATEMENT_AUDIT.md",
+    "verification_guide": "VERIFICATION.md",
+    "source_audit": "SOURCE_AUDIT.md",
+    "frozen_proof_transcript_sha256": "27bccc453fd94d50cdb25e788fe23df8f1472d6e8a368b91f33cf0a0e4d8277c",
+    "payload_sha256": "3bb6d879f7bf55083678c3a0cdce0e33bc980f32bde1bb76e300f89bca2fc098"
+  },
+  "formalization": {
+    "proof_assistant": null,
+    "status": "not_part_of_current_trust_boundary"
+  },
   "external_specialist_review": "pending"
 }
