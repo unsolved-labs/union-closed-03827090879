@@ -8,7 +8,7 @@ Public theorem:
 
 $$
 \forall\ \text{finite union-closed }\mathcal F\neq\{\varnothing\},\quad
-\exists x:\ 
+\exists x:\
 |\{A\in\mathcal F:x\in A\}|
 \ge
 \frac{3827090879}{10000000000}\,|\mathcal F|.
@@ -36,7 +36,7 @@ Canonical machine-readable constant: `verification-report.json`:
 | Main entropy inequality holds on `[0.01,0.999999]^2` | Manuscript §6.3 | Boost.Interval adaptive directed-rounding checker | checked |
 | Compact-core result is independently reproduced | Manuscript §7 | separately written MPFR-256 checker with independent subdivision/backend | checked |
 | Frozen MPFR leaves cover the entire certified domain | Manuscript §7 | prefix-tree completeness validation before numerical replay | checked |
-| Archived proof transcript matches the original frozen proof payload | `PROOF.md` | SHA-256 of concatenated `proof/part-01.md` + `part-02.md` + `part-03.md` | release-integrity check |
+| Public proof segments reconstruct the proof frozen in the payload | `PROOF.md`, `proof/README.md` | verify raw segment hash, insert the documented one-byte Part 1→Part 2 newline, extract payload `PROOF.md`, require identical SHA-256 `27bccc…` and byte-for-byte equality | checked by release-integrity CI |
 | Search/heuristic optimization is outside the final correctness oracle | Manuscript §§7–8; `VERIFICATION.md` | final checkers accept frozen artifacts directly | checked structurally |
 | Independent specialist review has occurred | — | `verification-report.json` says `pending` | **not claimed** |
 | Full proof-assistant formalization has occurred | — | no Lean theorem is in the release trust boundary | **not claimed** |
