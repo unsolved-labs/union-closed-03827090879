@@ -1,9 +1,11 @@
 # Proof artifacts
 
-The canonical public proof is the typeset manuscript:
+The canonical public typeset proof is the manuscript source:
 
-- [PDF](manuscript/r010_union_closed_bound.pdf)
 - [LaTeX source](manuscript/r010_union_closed_bound.tex)
+- [Build instructions](manuscript/README.md)
+
+Run `make -C manuscript` to generate the PDF locally. CI rebuilds the same source.
 
 ## Frozen transcript
 
@@ -19,6 +21,6 @@ Concatenating those three files byte-for-byte reproduces the proof text frozen i
 27bccc453fd94d50cdb25e788fe23df8f1472d6e8a368b91f33cf0a0e4d8277c
 ```
 
-Those files intentionally retain their original bytes, including legacy TeX delimiters, because changing them alone would break the recorded proof/payload identity. For rendered mathematics, use the manuscript above.
+Those archival files intentionally retain their original bytes, including legacy TeX delimiters, because changing them alone would break the recorded proof/payload identity. For canonical typesetting, use the manuscript source above.
 
 `scripts/check_release_integrity.py` verifies this frozen transcript hash directly from the public repository files.
