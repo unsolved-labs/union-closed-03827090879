@@ -12,8 +12,18 @@ jobs:
   release-integrity:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Detect committed manuscript PDF
+        id: pdf-state
+        run: |
+          if git ls-files --error-unmatch manuscript/r010_union_closed_bound.pdf >/dev/null 2>&1; then
+            echo 'tracked=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'tracked=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Check public release metadata and frozen proof identity
         run: python3 scripts/check_release_integrity.py
       - name: Install manuscript toolchain
@@ -24,6 +34,7 @@ jobs:
         run: |
           make -C manuscript clean
           make -C manuscript
+          echo '2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546  manuscript/r010_union_closed_bound.pdf' | sha256sum -c -
           pdftotext manuscript/r010_union_closed_bound.pdf manuscript/r010_union_closed_bound.txt
           grep -Fq '0.3827090879' manuscript/r010_union_closed_bound.txt
           grep -Fq 'independent specialist review remains pending' manuscript/r010_union_closed_bound.txt
@@ -34,6 +45,14 @@ jobs:
           path: manuscript/r010_union_closed_bound.pdf
           if-no-files-found: error
           retention-days: 7
+      - name: Commit verified manuscript PDF on publication branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/r010-publication-artifacts' && steps.pdf-state.outputs.tracked == 'false'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add manuscript/r010_union_closed_bound.pdf
+          git commit -m 'R010: add reproducible manuscript PDF'
+          git push
       - name: Re-check public release integrity
         run: python3 scripts/check_release_integrity.py
 
