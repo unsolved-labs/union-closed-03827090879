@@ -40,12 +40,17 @@ See [`SOURCE_AUDIT.md`](SOURCE_AUDIT.md) for the version-pinned literature and n
 
 ## Manuscript
 
+- [Typeset manuscript PDF](manuscript/r010_union_closed_bound.pdf)
 - [Paper-quality LaTeX source](manuscript/r010_union_closed_bound.tex)
 - [Reproducible build instructions](manuscript/README.md)
 
-Run `make -C manuscript` to produce `manuscript/r010_union_closed_bound.pdf`. CI independently rebuilds the paper from source and checks its key public statements.
+The committed PDF is the deterministic CI build of the version-controlled source. CI requires a fresh rebuild to be byte-identical to the committed PDF, whose SHA-256 is
 
-The files under `proof/part-*.md` are retained as the **byte-frozen proof transcript** linked to the original verifier payload. They intentionally preserve their original bytes; use the manuscript source/build for the canonical typeset proof.
+```text
+2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546
+```
+
+The files under `proof/part-*.md` are retained as the **historical proof transcript** linked to the original verifier payload. They intentionally preserve their original bytes; use the manuscript for the canonical rendered proof.
 
 ## Verification
 
@@ -95,6 +100,7 @@ The payload materializer checks the exact archive SHA-256 before extraction and 
 - Directed-rounding Boost interval certificate: **verified by CI**
 - Independent MPFR-256 certificate: **verified by CI**
 - Frozen static MPFR partition replay: **verified by CI**
+- Deterministic manuscript source/PDF correspondence: **verified by CI**
 - Analytic proof in a proof assistant: **not currently part of the trust boundary**
 - Independent specialist review: **pending**
 
@@ -103,11 +109,11 @@ The result should therefore be described as a **reproducible computer-assisted p
 ## Repository map
 
 - `CLAIM.md` — frozen theorem, exact constants, non-claims, and trust boundary.
-- `manuscript/` — paper source and deterministic build instructions.
+- `manuscript/` — paper source, committed rendered PDF, and deterministic build instructions.
 - `STATEMENT_AUDIT.md` — public claim → manuscript → certificate/checker mapping.
 - `VERIFICATION.md` — exact reproduction commands and trust assumptions.
 - `SOURCE_AUDIT.md` — pinned prior-work and novelty boundary.
-- `PROOF.md` / `proof/part-*.md` — original byte-frozen proof transcript.
+- `PROOF.md` / `proof/part-*.md` — original historical proof transcript and documented payload reconstruction.
 - `verification-report.json` — machine-readable frozen claim and reference margins.
 - `EXTERNAL_REVIEW_CHECKLIST.md` — modular public checklist for independent review.
 - `payload/part-*.b64` — deterministic verifier/certificate package.
