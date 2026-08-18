@@ -34,17 +34,18 @@ $$
 
 The entropy method initiated by Gilmer produced the first constant lower bound for the union-closed sets conjecture. Subsequent dependent-coupling work of Sawin, Yu, and Cambie reached an unconditional frontier near $0.3823455$. Liu then introduced a conditionally-i.i.d. protocol and proved an analytic strict improvement; a nine-dimensional numerical optimization in that work suggested a value near $0.38271$ under explicitly numerically verified structural hypotheses.
 
-R010 proves the exact rational constant $0.3827090879$ **without assuming those optimization/positive-semidefiniteness hypotheses**. The release replaces them with two pointwise entropy inequalities: one analytic (with an exact rational Bernstein check) and one rigorously certified by interval arithmetic.
+R010 proves the exact rational constant $0.3827090879$ **without assuming those optimization/positive-semidefiniteness hypotheses**. The release replaces them with two pointwise entropy inequalities: one analytic, with an exact rational Bernstein check, and one rigorously certified by interval arithmetic.
 
-See [`SOURCE_AUDIT.md`](SOURCE_AUDIT.md) for the pinned literature boundary.
+See [`SOURCE_AUDIT.md`](SOURCE_AUDIT.md) for the version-pinned literature and novelty boundary.
 
 ## Manuscript
 
-- [Typeset manuscript PDF](manuscript/r010_union_closed_bound.pdf)
-- [LaTeX source](manuscript/r010_union_closed_bound.tex)
-- [Manuscript build instructions](manuscript/README.md)
+- [Paper-quality LaTeX source](manuscript/r010_union_closed_bound.tex)
+- [Reproducible build instructions](manuscript/README.md)
 
-The files under `proof/part-*.md` are retained as the **byte-frozen proof transcript** linked to the original verifier payload. They intentionally preserve their original bytes; use the manuscript above for the canonical rendered proof.
+Run `make -C manuscript` to produce `manuscript/r010_union_closed_bound.pdf`. CI independently rebuilds the paper from source and checks its key public statements.
+
+The files under `proof/part-*.md` are retained as the **byte-frozen proof transcript** linked to the original verifier payload. They intentionally preserve their original bytes; use the manuscript source/build for the canonical typeset proof.
 
 ## Verification
 
@@ -102,7 +103,7 @@ The result should therefore be described as a **reproducible computer-assisted p
 ## Repository map
 
 - `CLAIM.md` — frozen theorem, exact constants, non-claims, and trust boundary.
-- `manuscript/` — public paper source, PDF, and build instructions.
+- `manuscript/` — paper source and deterministic build instructions.
 - `STATEMENT_AUDIT.md` — public claim → manuscript → certificate/checker mapping.
 - `VERIFICATION.md` — exact reproduction commands and trust assumptions.
 - `SOURCE_AUDIT.md` — pinned prior-work and novelty boundary.
