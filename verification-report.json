@@ -39,6 +39,8 @@
   },
   "public_artifacts": {
     "manuscript_source": "manuscript/r010_union_closed_bound.tex",
+    "manuscript_pdf": "manuscript/r010_union_closed_bound.pdf",
+    "manuscript_pdf_sha256": "2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546",
     "manuscript_build": "make -C manuscript",
     "statement_audit": "STATEMENT_AUDIT.md",
     "verification_guide": "VERIFICATION.md",
