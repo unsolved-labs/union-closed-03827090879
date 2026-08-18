@@ -5,9 +5,34 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+  release-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check public release metadata and frozen proof identity
+        run: python3 scripts/check_release_integrity.py
+      - name: Install manuscript toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y latexmk texlive-latex-base texlive-latex-recommended texlive-fonts-recommended poppler-utils
+      - name: Rebuild manuscript from source
+        run: |
+          make -C manuscript clean
+          make -C manuscript
+          pdftotext manuscript/r010_union_closed_bound.pdf manuscript/r010_union_closed_bound.txt
+          grep -Fq '0.3827090879' manuscript/r010_union_closed_bound.txt
+          grep -Fq 'independent specialist review remains pending' manuscript/r010_union_closed_bound.txt
+      - name: Re-check public release integrity
+        run: python3 scripts/check_release_integrity.py
+
   exact-and-boost:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -48,6 +73,7 @@ jobs:
 
   mpfr-independent:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -67,6 +93,7 @@ jobs:
 
   static-mpfr-replay:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
