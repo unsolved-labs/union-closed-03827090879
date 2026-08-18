@@ -27,6 +27,13 @@ jobs:
           pdftotext manuscript/r010_union_closed_bound.pdf manuscript/r010_union_closed_bound.txt
           grep -Fq '0.3827090879' manuscript/r010_union_closed_bound.txt
           grep -Fq 'independent specialist review remains pending' manuscript/r010_union_closed_bound.txt
+      - name: Upload built manuscript PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: r010-manuscript-pdf
+          path: manuscript/r010_union_closed_bound.pdf
+          if-no-files-found: error
+          retention-days: 7
       - name: Re-check public release integrity
         run: python3 scripts/check_release_integrity.py
 
