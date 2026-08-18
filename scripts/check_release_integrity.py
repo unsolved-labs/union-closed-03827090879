@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_PAYLOAD_SHA256 = "3bb6d879f7bf55083678c3a0cdce0e33bc980f32bde1bb76e300f89bca2fc098"
 EXPECTED_RAW_SEGMENTS_SHA256 = "e01a06007344591ddaee74854e19581ad3ca3e53a483d054bff1cf896be5871e"
 EXPECTED_PAYLOAD_PROOF_SHA256 = "27bccc453fd94d50cdb25e788fe23df8f1472d6e8a368b91f33cf0a0e4d8277c"
+EXPECTED_MANUSCRIPT_PDF_SHA256 = "2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546"
 EXPECTED_C = (3827090879, 10_000_000_000)
 
 
@@ -32,12 +33,17 @@ if report.get("external_specialist_review") != "pending":
 required = [
     "README.md", "CLAIM.md", "PROOF.md", "STATEMENT_AUDIT.md",
     "VERIFICATION.md", "SOURCE_AUDIT.md",
-    "manuscript/r010_union_closed_bound.tex", "manuscript/Makefile",
-    "manuscript/README.md", "proof/README.md",
+    "manuscript/r010_union_closed_bound.tex",
+    "manuscript/r010_union_closed_bound.pdf",
+    "manuscript/Makefile", "manuscript/README.md", "proof/README.md",
 ]
 for rel in required:
     if not (ROOT / rel).is_file():
         fail(f"missing public release artifact: {rel}")
+
+pdf_sha = hashlib.sha256((ROOT / "manuscript/r010_union_closed_bound.pdf").read_bytes()).hexdigest()
+if pdf_sha != EXPECTED_MANUSCRIPT_PDF_SHA256:
+    fail(f"committed manuscript PDF SHA-256 mismatch: {pdf_sha}")
 
 # Reconstruct the frozen archive and inspect the proof actually shipped inside.
 parts = sorted((ROOT / "payload").glob("part-*.b64"))
@@ -110,6 +116,7 @@ for rel in ["README.md", "CLAIM.md", "STATEMENT_AUDIT.md", "manuscript/r010_unio
         fail(f"exact theorem constant missing from {rel}")
 
 print("R010 PUBLIC RELEASE INTEGRITY PASSED")
+print(f"manuscript_pdf_sha256={pdf_sha}")
 print(f"raw_segment_sha256={raw_sha}")
 print(f"reconstructed_payload_proof_sha256={reconstructed_sha}")
 print(f"payload_sha256={payload_sha}")

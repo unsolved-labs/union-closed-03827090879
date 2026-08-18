@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "An unconditional 0.3827090879 lower bound for the union-closed sets conjecture"
+message: "If you use this research artifact, please cite this repository and Unsolved Labs Research Release R010."
+type: software
+authors:
+  - name: "Unsolved Labs"
+repository-code: "https://github.com/unsolved-labs/union-closed-03827090879"
+url: "https://unsolved-labs.github.io/results/r010-union-closed-03827090879/"
+version: "R010"
+date-released: 2026-08-14

@@ -119,15 +119,33 @@ Explicitly outside the final correctness oracle are the frontier-AI generation p
 
 No Lean theorem is currently part of the R010 proof object. The highest-value future formalization targets are the protocol-to-entropy deduction, the implication from the two pointwise inequalities to the exact union-closed bound, the analytic kernel argument, and the elementary boundary reductions. The large interval partition is already represented more directly as a frozen certificate checked by independent rigorous programs.
 
-## Manuscript build
+## Manuscript build and rendered artifact
 
-The version-controlled paper source is `manuscript/r010_union_closed_bound.tex`.
+Canonical paper source:
+
+```text
+manuscript/r010_union_closed_bound.tex
+```
+
+Committed rendered paper:
+
+```text
+manuscript/r010_union_closed_bound.pdf
+```
+
+Build it with:
 
 ```bash
 make -C manuscript
 ```
 
-This generates `manuscript/r010_union_closed_bound.pdf`. CI rebuilds the PDF from source and checks its rendered text; the generated PDF is not an independent statement source.
+The expected PDF SHA-256 is:
+
+```text
+2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546
+```
+
+CI checks the committed digest, rebuilds the manuscript with the pinned `SOURCE_DATE_EPOCH`, requires the rebuild to be byte-identical to the committed PDF, extracts its text, and verifies the exact theorem constant and pending-review disclosure. The LaTeX source remains the canonical typeset statement source; the PDF is its reproducible rendered artifact.
 
 ## Repository-level integrity
 
@@ -135,4 +153,4 @@ This generates `manuscript/r010_union_closed_bound.pdf`. CI rebuilds the PDF fro
 python3 scripts/check_release_integrity.py
 ```
 
-This verifies exact-constant consistency, pending review status, required public artifacts, the frozen proof-transcript SHA-256, GitHub-safe math delimiters in primary Markdown, and absence of common local/private filesystem paths.
+This verifies exact-constant consistency, pending review status, required public artifacts, the committed manuscript PDF digest, the historical proof/payload reconstruction hashes, GitHub-safe math delimiters in primary Markdown, and absence of common local/private filesystem paths.

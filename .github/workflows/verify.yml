@@ -16,17 +16,29 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check public release metadata and frozen proof identity
         run: python3 scripts/check_release_integrity.py
+      - name: Check committed manuscript PDF digest
+        run: echo '2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546  manuscript/r010_union_closed_bound.pdf' | sha256sum -c -
       - name: Install manuscript toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y latexmk texlive-latex-base texlive-latex-recommended texlive-fonts-recommended poppler-utils
       - name: Rebuild manuscript from source
         run: |
+          cp manuscript/r010_union_closed_bound.pdf /tmp/r010_union_closed_bound.committed.pdf
           make -C manuscript clean
           make -C manuscript
+          echo '2731b1b278c4edb8f8f72e229e96a14cb9f2753f0c6d842a3dd27c75601fe546  manuscript/r010_union_closed_bound.pdf' | sha256sum -c -
+          cmp /tmp/r010_union_closed_bound.committed.pdf manuscript/r010_union_closed_bound.pdf
           pdftotext manuscript/r010_union_closed_bound.pdf manuscript/r010_union_closed_bound.txt
           grep -Fq '0.3827090879' manuscript/r010_union_closed_bound.txt
           grep -Fq 'independent specialist review remains pending' manuscript/r010_union_closed_bound.txt
+      - name: Upload rebuilt manuscript PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: r010-manuscript-pdf
+          path: manuscript/r010_union_closed_bound.pdf
+          if-no-files-found: error
+          retention-days: 7
       - name: Re-check public release integrity
         run: python3 scripts/check_release_integrity.py
 
