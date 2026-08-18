@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import base64
-import difflib
 import hashlib
 import io
 import json
@@ -12,6 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_PAYLOAD_SHA256 = "3bb6d879f7bf55083678c3a0cdce0e33bc980f32bde1bb76e300f89bca2fc098"
+EXPECTED_RAW_SEGMENTS_SHA256 = "e01a06007344591ddaee74854e19581ad3ca3e53a483d054bff1cf896be5871e"
+EXPECTED_PAYLOAD_PROOF_SHA256 = "27bccc453fd94d50cdb25e788fe23df8f1472d6e8a368b91f33cf0a0e4d8277c"
 EXPECTED_C = (3827090879, 10_000_000_000)
 
 
@@ -32,15 +33,13 @@ required = [
     "README.md", "CLAIM.md", "PROOF.md", "STATEMENT_AUDIT.md",
     "VERIFICATION.md", "SOURCE_AUDIT.md",
     "manuscript/r010_union_closed_bound.tex", "manuscript/Makefile",
-    "manuscript/README.md",
+    "manuscript/README.md", "proof/README.md",
 ]
 for rel in required:
     if not (ROOT / rel).is_file():
         fail(f"missing public release artifact: {rel}")
 
-# Reconstruct the frozen release archive and inspect the proof actually shipped
-# inside it. This turns an old prose assertion about proof identity into an
-# executable audit.
+# Reconstruct the frozen archive and inspect the proof actually shipped inside.
 parts = sorted((ROOT / "payload").glob("part-*.b64"))
 if [p.name for p in parts] != [f"part-{i:02d}.b64" for i in range(1, 7)]:
     fail("unexpected payload segment set")
@@ -62,32 +61,36 @@ with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:gz") as tf:
         fail("could not read payload PROOF.md")
     payload_proof = fh.read()
 
-public_proof = b"".join((ROOT / "proof" / f"part-{i:02d}.md").read_bytes() for i in range(1, 4))
-public_sha = hashlib.sha256(public_proof).hexdigest()
+# Historical transport split: raw file concatenation is missing one newline at
+# the part-01 -> part-02 boundary. Preserve the original public segment bytes,
+# but encode the separator explicitly when reconstructing the payload proof.
+p1 = (ROOT / "proof/part-01.md").read_bytes()
+p2 = (ROOT / "proof/part-02.md").read_bytes()
+p3 = (ROOT / "proof/part-03.md").read_bytes()
+raw_segments = p1 + p2 + p3
+raw_sha = hashlib.sha256(raw_segments).hexdigest()
+if raw_sha != EXPECTED_RAW_SEGMENTS_SHA256:
+    fail(f"raw public proof-segment hash drift: {raw_sha}")
+reconstructed_proof = p1 + b"\n" + p2 + p3
+reconstructed_sha = hashlib.sha256(reconstructed_proof).hexdigest()
 payload_proof_sha = hashlib.sha256(payload_proof).hexdigest()
-
-if public_proof != payload_proof:
-    public_text = public_proof.decode("utf-8", errors="replace").splitlines()
-    payload_text = payload_proof.decode("utf-8", errors="replace").splitlines()
-    diff = list(difflib.unified_diff(public_text, payload_text, fromfile="public-proof-segments", tofile="payload-PROOF.md", n=2))
-    print(f"PUBLIC_PROOF_SHA256={public_sha}")
-    print(f"PAYLOAD_PROOF_SHA256={payload_proof_sha}")
-    print(f"PUBLIC_PROOF_BYTES={len(public_proof)}")
-    print(f"PAYLOAD_PROOF_BYTES={len(payload_proof)}")
-    print("FIRST_PROOF_DIFF_LINES:")
-    for line in diff[:80]:
-        print(line)
-    fail("public proof segments are not byte-identical to payload PROOF.md; reconcile or document deliberately")
+if reconstructed_sha != EXPECTED_PAYLOAD_PROOF_SHA256:
+    fail(f"reconstructed proof SHA-256 mismatch: {reconstructed_sha}")
+if payload_proof_sha != EXPECTED_PAYLOAD_PROOF_SHA256:
+    fail(f"payload proof SHA-256 mismatch: {payload_proof_sha}")
+if reconstructed_proof != payload_proof:
+    fail("reconstructed public transcript is not byte-identical to payload PROOF.md")
 
 primary_markdown = [
     "README.md", "CLAIM.md", "PROOF.md", "STATEMENT_AUDIT.md",
     "VERIFICATION.md", "SOURCE_AUDIT.md", "EXTERNAL_REVIEW_CHECKLIST.md",
-    "manuscript/README.md",
+    "manuscript/README.md", "proof/README.md",
 ]
 legacy = re.compile(r"\\\(|\\\)|\\\[|\\\]")
 for rel in primary_markdown:
     text = (ROOT / rel).read_text(encoding="utf-8")
-    if legacy.search(text):
+    # proof/README.md necessarily documents the literal legacy delimiters.
+    if rel != "proof/README.md" and legacy.search(text):
         fail(f"legacy TeX delimiter in primary public Markdown: {rel}")
 
 private_path_patterns = [
@@ -107,6 +110,6 @@ for rel in ["README.md", "CLAIM.md", "STATEMENT_AUDIT.md", "manuscript/r010_unio
         fail(f"exact theorem constant missing from {rel}")
 
 print("R010 PUBLIC RELEASE INTEGRITY PASSED")
-print(f"public_proof_sha256={public_sha}")
-print(f"payload_proof_sha256={payload_proof_sha}")
+print(f"raw_segment_sha256={raw_sha}")
+print(f"reconstructed_payload_proof_sha256={reconstructed_sha}")
 print(f"payload_sha256={payload_sha}")
